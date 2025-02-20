@@ -112,13 +112,13 @@ parser.add_argument('--dist_url', default='env://', help='url used to set up dis
 
 args = parser.parse_args()
 
-from pynvml import *
-nvmlInit()
-h = nvmlDeviceGetHandleByIndex(0)
-info = nvmlDeviceGetMemoryInfo(h)
-print(f'total    : {info.total/1024/1024/1024}')
-print(f'free     : {info.free/1024/1024/1024}')
-print(f'used     : {info.used/1024/1024/1024}')
+# from pynvml import *
+# nvmlInit()
+# h = nvmlDeviceGetHandleByIndex(0)
+# info = nvmlDeviceGetMemoryInfo(h)
+# print(f'total    : {info.total/1024/1024/1024}')
+# print(f'free     : {info.free/1024/1024/1024}')
+# print(f'used     : {info.used/1024/1024/1024}')
 
 # bowen need to put it here since code starts before main function. 
 train_utils.init_distributed_mode(args)
@@ -257,11 +257,6 @@ def main():
             # medsam_model.load_state_dict(checkpoint["model"])
             model_without_ddp.load_state_dict(checkpoint['model'])
             # optimizer.load_state_dict(checkpoint["optimizer"])
-            h = nvmlDeviceGetHandleByIndex(0)
-            info = nvmlDeviceGetMemoryInfo(h)
-            print(f'total    : {info.total/1024/1024/1024}')
-            print(f'free     : {info.free/1024/1024/1024}')
-            print(f'used     : {info.used/1024/1024/1024}')
     if args.use_amp:
         scaler = torch.cuda.amp.GradScaler()
 
@@ -288,11 +283,6 @@ def main():
             b,c,h,w = image.tensors.shape
             boxes_np = np.repeat(np.array([[0,0,h,w]]), args.batch_size, axis=0)
             image = image.to(device)
-            h = nvmlDeviceGetHandleByIndex(0)
-            info = nvmlDeviceGetMemoryInfo(h)
-            print(f'total    : {info.total/1024/1024/1024}')
-            print(f'free     : {info.free/1024/1024/1024}')
-            print(f'used     : {info.used/1024/1024/1024}')
             outputs = medsam_model(image, boxes_np)
             loss_dict = criterion(outputs, targets)
             weight_dict = criterion.weight_dict
@@ -306,7 +296,7 @@ def main():
             losses_reduced_scaled = sum(loss_dict_reduced_scaled.values())
 
             loss_value = losses_reduced_scaled.item()
-            import pdb; pdb.set_trace()
+            # import pdb; pdb.set_trace()
 
             if not math.isfinite(loss_value):
                 print("Loss is {}, stopping training".format(loss_value))
