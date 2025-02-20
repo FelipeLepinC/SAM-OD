@@ -73,7 +73,7 @@ def xywhn2xyxy(x, padw=0, padh=0):
     return y
 
 def extract_id_from_path(path):
-    img_name = path.split('\\')[-1].strip('.jpg').strip('v2_')
+    img_name = path.split('/')[-1].strip('.jpg').strip('v2_')
     return int(img_name)
 
 #TODO : Add data augmentation later, transforms.py file from DETR
