@@ -318,13 +318,13 @@ def make_coco_transforms(image_set):
 
 
 def build_dataset(image_set, args):
-    root = Path(args.coco_path)
+    root = Path(args.coco_path) # C:\Users\Asus\Documents\Feria\Repositorio\UTUAV-OD\Data\C_Split_80_10_10
     assert root.exists(), f'provided COCO path {root} does not exist'
     mode = 'instances'
     PATHS = {
         # "train": (root / "train2017", root / "annotations" / "instances_train2017.json"),
-        "train": (root / "val2017", root / "annotations" / "instances_val2017.json"),
-        "val": (root / "val2017", root / "annotations" / "instances_val2017.json"),
+        "train": (root / "training" / "images", root / "training" / "Annotations"),
+        "val": (root / "validation" / "images", root / "validation" / "Annotations"),
     }
 
     img_folder, ann_file = PATHS[image_set]

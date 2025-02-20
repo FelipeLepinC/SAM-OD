@@ -73,6 +73,7 @@ def custom_collate(batch):
     targets = []
 
     for data in batch:
+        # import pdb; pdb.set_trace()
         images.append(data["image"])
         targets.append(data["target"])
 

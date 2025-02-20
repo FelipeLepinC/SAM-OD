@@ -120,6 +120,14 @@ class ImageEncoderViT(nn.Module):
         )
 
     def forward(self, x: torch.Tensor, x_hfc=None) -> torch.Tensor:
+        from pynvml import nvmlInit, nvmlDeviceGetHandleByIndex, nvmlDeviceGetMemoryInfo
+        nvmlInit()
+        h = nvmlDeviceGetHandleByIndex(0)
+        info = nvmlDeviceGetMemoryInfo(h)
+        print("Forward EncoderViT info memory")
+        print(f'total    : {info.total/1024/1024/1024}')
+        print(f'free     : {info.free/1024/1024/1024}')
+        print(f'used     : {info.used/1024/1024/1024}')
         x = self.patch_embed(x)
         if self.pos_embed is not None:
             x = x + self.pos_embed
@@ -128,7 +136,16 @@ class ImageEncoderViT(nn.Module):
         #cross attention fron high frequencies to image features
         x_hfc = self.hfc_attn(x_hfc_embed, x)
         x = x_hfc + x
-
+        # del x_hfc # free memory
+        # del x_hfc_embed # free memory
+        # torch.cuda.empty_cache()
+        # torch._C._cuda_clearCublasWorkspaces()
+        # h = nvmlDeviceGetHandleByIndex(0)
+        # info = nvmlDeviceGetMemoryInfo(h)
+        # print("After delete info memory")
+        # print(f'total    : {info.total/1024/1024/1024}')
+        # print(f'free     : {info.free/1024/1024/1024}')
+        # print(f'used     : {info.used/1024/1024/1024}')
         for blk in self.blocks:
             x = blk(x)
 

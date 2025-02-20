@@ -16,7 +16,8 @@ import torch.nn as nn
 from torch.utils.data import DataLoader, DistributedSampler
 
 
-from dataloader_coco import build_dataset
+# from dataloader_coco import build_dataset
+from dataloader_yolo import build_dataset
 from segment_anything import sam_model_registry
 import torch.nn.functional as F
 import argparse
@@ -85,7 +86,7 @@ parser.add_argument('--eos_coef', default=0.1, type=float,
 
 #dataset parameters
 parser.add_argument('--dataset_file', default='coco')
-parser.add_argument('--coco_path', type=str)
+parser.add_argument('--yolo_path', type=str)
 parser.add_argument('--remove_difficult', action='store_true')
 
 parser.add_argument('--output_dir', default='', help='path where to save, empty for no saving')
@@ -111,6 +112,14 @@ parser.add_argument('--dist_url', default='env://', help='url used to set up dis
 
 args = parser.parse_args()
 
+from pynvml import *
+nvmlInit()
+h = nvmlDeviceGetHandleByIndex(0)
+info = nvmlDeviceGetMemoryInfo(h)
+print(f'total    : {info.total/1024/1024/1024}')
+print(f'free     : {info.free/1024/1024/1024}')
+print(f'used     : {info.used/1024/1024/1024}')
+
 # bowen need to put it here since code starts before main function. 
 train_utils.init_distributed_mode(args)
 
@@ -129,6 +138,7 @@ dataset_train = build_dataset(image_set='train', args=args)
 dataset_val = build_dataset(image_set='val', args=args)
 import cv2
 for step, data in enumerate(dataset_train):
+    # import pdb; pdb.set_trace()
     break
     image = np.transpose(np.asarray(data['image']), (1,2,0))
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -247,6 +257,11 @@ def main():
             # medsam_model.load_state_dict(checkpoint["model"])
             model_without_ddp.load_state_dict(checkpoint['model'])
             # optimizer.load_state_dict(checkpoint["optimizer"])
+            h = nvmlDeviceGetHandleByIndex(0)
+            info = nvmlDeviceGetMemoryInfo(h)
+            print(f'total    : {info.total/1024/1024/1024}')
+            print(f'free     : {info.free/1024/1024/1024}')
+            print(f'used     : {info.used/1024/1024/1024}')
     if args.use_amp:
         scaler = torch.cuda.amp.GradScaler()
 
@@ -266,12 +281,18 @@ def main():
             optimizer.zero_grad()
             image = data[0]
             targets = data[1]
+            # import pdb; pdb.set_trace()
             targets = [{k: v.to(device) for k, v in t.items()} for t in targets]
 
             #passing the whole image as prompt
             b,c,h,w = image.tensors.shape
             boxes_np = np.repeat(np.array([[0,0,h,w]]), args.batch_size, axis=0)
             image = image.to(device)
+            h = nvmlDeviceGetHandleByIndex(0)
+            info = nvmlDeviceGetMemoryInfo(h)
+            print(f'total    : {info.total/1024/1024/1024}')
+            print(f'free     : {info.free/1024/1024/1024}')
+            print(f'used     : {info.used/1024/1024/1024}')
             outputs = medsam_model(image, boxes_np)
             loss_dict = criterion(outputs, targets)
             weight_dict = criterion.weight_dict
@@ -285,6 +306,7 @@ def main():
             losses_reduced_scaled = sum(loss_dict_reduced_scaled.values())
 
             loss_value = losses_reduced_scaled.item()
+            import pdb; pdb.set_trace()
 
             if not math.isfinite(loss_value):
                 print("Loss is {}, stopping training".format(loss_value))
