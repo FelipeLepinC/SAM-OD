@@ -284,13 +284,6 @@ def main():
             boxes_np = np.repeat(np.array([[0,0,h,w]]), args.batch_size, axis=0)
             image = image.to(device)
             outputs = medsam_model(image, boxes_np)
-            print("Memory usage after get output model")
-            nvmlInit()
-            h = nvmlDeviceGetHandleByIndex(0)
-            info = nvmlDeviceGetMemoryInfo(h)
-            print(f'total    : {info.total/1024/1024/1024}')
-            print(f'free     : {info.free/1024/1024/1024}')
-            print(f'used     : {info.used/1024/1024/1024}')
             loss_dict = criterion(outputs, targets)
             weight_dict = criterion.weight_dict
             losses = sum(loss_dict[k] * weight_dict[k] for k in loss_dict.keys() if k in weight_dict)
