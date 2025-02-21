@@ -292,7 +292,7 @@ def _build_sam(
     sam.eval()
     if checkpoint is not None:
         with open(checkpoint, "rb") as f:
-            state_dict = torch.load(f)
+            state_dict = torch.load(f, weights_only=True)
             #get only the transformer trained weights and delete rest 
             all_params_name = list(state_dict.keys())
             mask_dec_params = [p for p in all_params_name if 'mask_decoder' in p]

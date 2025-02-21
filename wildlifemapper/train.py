@@ -251,7 +251,7 @@ def main():
         if os.path.isfile(args.resume):
             print("RESUMING TRAINING")
             ## Map model to be loaded to specified single GPU
-            checkpoint = torch.load(args.resume, map_location=device)
+            checkpoint = torch.load(args.resume, map_location=device, weights_only=True)
             start_epoch = checkpoint["epoch"] + 1
             # bowen
             # medsam_model.load_state_dict(checkpoint["model"])
@@ -312,12 +312,7 @@ def main():
 
             optimizer.zero_grad()            
             losses.backward()
-            print("Memory usage after backward pass")
-            h = nvmlDeviceGetHandleByIndex(0)
-            info = nvmlDeviceGetMemoryInfo(h)
-            print(f'total    : {info.total/1024/1024/1024}')
-            print(f'free     : {info.free/1024/1024/1024}')
-            print(f'used     : {info.used/1024/1024/1024}')
+
 
             if args.clip_max_norm > 0:
                 torch.nn.utils.clip_grad_norm_(medsam_model.parameters(), args.clip_max_norm)

@@ -25,13 +25,14 @@ class MedSAM(nn.Module):
             elif "patch_embed" in name:
                 param.requires_grad = True
             else:
+                # print(f"Freezing {name}")
                 param.requires_grad = False
         # freeze prompt encoder
         for param in self.prompt_encoder.parameters():
-            param.requires_grad = True
+            param.requires_grad = False  # True
         #train mask decoder
         for param in self.mask_decoder.parameters():
-            param.requires_grad = True
+            param.requires_grad = False  # True
         
     def fft(self, img, rate=0.125):
         # the smaller rate, the smoother; the larger rate, the darker
