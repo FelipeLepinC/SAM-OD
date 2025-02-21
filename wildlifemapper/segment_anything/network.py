@@ -32,7 +32,7 @@ class MedSAM(nn.Module):
             param.requires_grad = False  # True
         #train mask decoder
         for param in self.mask_decoder.parameters():
-            param.requires_grad = True  # True
+            param.requires_grad = False  # True
         
     def fft(self, img, rate=0.125):
         # the smaller rate, the smoother; the larger rate, the darker
